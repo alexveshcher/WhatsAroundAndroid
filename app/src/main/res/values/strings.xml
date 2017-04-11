@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">WhatsAroundAndroid</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="find_places">Find places!</string>
+    <string name="sights">Sights</string>
+    <string name="food">Food</string>
+    <string name="random">Random</string>
 </resources>

@@ -1,5 +1,6 @@
-package ua.com.aveshcher.whatsaroundandroid;
+package ua.com.aveshcher.whatsaroundandroid.activity;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,28 +12,24 @@ import android.util.Log;
 import android.widget.Toast;
 import com.android.volley.*;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.model.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import ua.com.aveshcher.whatsaroundandroid.R;
+import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    String tag = "CONNECT";
-    private static final String IP = "192.168.0.27";
+    private String tag = "CONNECT";
+    private String category;
+    private static final String DOMAIN = "whats-around.herokuapp.com";
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
 
@@ -53,6 +50,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addApi(LocationServices.API)
                     .build();
         }
+
+        Intent intent = getIntent();
+        category = intent.getStringExtra(MainActivity.CATEGORY);
     }
 
 
@@ -68,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     protected void onStart() {
@@ -114,7 +115,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(lat, lng))      // Sets the center of the map to Mountain View
-                    .zoom(15)                   // Sets the zoom
+                    .zoom(13)                   // Sets the zoom
 //                    .bearing(90)                // Sets the orientation of the camera to east
 //                    .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                     .build();                   // Creates a CameraPosition from the builder
@@ -129,20 +130,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             double lastLat = mLastLocation.getLatitude();
             double lastLng = mLastLocation.getLongitude();
 
-
-
-            // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(lastLat,lastLng))      // Sets the center of the map to Mountain View
-                    .zoom(15)                   // Sets the zoom
-//                    .bearing(90)                // Sets the orientation of the camera to east
-//                    .tilt(30)                   // Sets the tilt of the camera to 30 degrees
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),2000, null);
-
+            //show user's current location
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(lastLat, lastLng))
+                    .title("You")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+            );
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            String reqUrl = "http://"+IP+":3000/tests/try/" + lastLat + "/" + lastLng;
+            String reqUrl = "http://"+ DOMAIN +"/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
 
             JsonArrayRequest req = new JsonArrayRequest(reqUrl,
                     new Response.Listener<JSONArray>() {
@@ -150,38 +146,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onResponse(JSONArray response) {
                             Log.d(tag, "Response:"+ response.toString());
-                            String jsonResponse = ""; //for debug purposes
+                            String jsonResponseOutput = ""; //for debug purposes
                             try {
-                                // Parsing json object response
-                                // response will be a json object
                                 for (int i = 0; i < response.length(); i++) {
 
-                                    JSONObject place = (JSONObject) response
+                                    JSONObject placeObject = (JSONObject) response
                                             .get(i);
 
-                                    String id = place.getString("id");
-                                    String name = place.getString("name");
-                                    double lat = place.getDouble("lat");
-                                    double lng = place.getDouble("lng");
-                                    int distance = place.getInt("distance");
-                                    JSONArray categories = place.getJSONArray("categories");
-                                    jsonResponse += "ID: " + categories + "\n\n";
-//                                    for(int j = 0; j < categories.length(); i++){
-//                                        JSONObject category = (JSONObject) categories.get(j);
-//                                        String categoryId = category.getString("id");
-//                                        String categoryName = category.getString("name");
-//                                        jsonResponse += j + "categoryId: " + categoryId + "\n\n";
-//                                        jsonResponse += j + "categoryName: " + categoryName + "\n\n";
-//                                    }
+                                    Place place = new Place(placeObject);
+                                    jsonResponseOutput = place.toString();
+//                                   TODO: maybe it is needed to parse categories of place
 
 
-                                    jsonResponse += "ID: " + id + "\n\n";
-                                    jsonResponse += "Name: " + name + "\n\n";
-                                    jsonResponse += "Lat: " + lat + "\n\n";
-                                    jsonResponse += "Lng: " + lng + "\n\n";
-                                    jsonResponse += "Distance: " + distance + "\n\n";
-                                    mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng)).title(name));
 
+//                                    mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLat(), place.getLng())).title(place.getName()));
+                                    Marker placeMarker = mMap.addMarker(new MarkerOptions()
+                                            .position(new LatLng(place.getLat(), place.getLng()))
+                                            .title(place.getName())
+                                            .snippet(place.getAddress())
+                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
+                                    );
+//                                    placeMarker.showInfoWindow();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -189,7 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         "JSON parsing error:" + e.getMessage(),
                                         Toast.LENGTH_LONG).show();
                             }
-                            Log.d(tag, jsonResponse);
+                            Log.d(tag, jsonResponseOutput);
                         }
                     }, new Response.ErrorListener() {
 
@@ -200,9 +185,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             "Response error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
-            //increase timeout time for response from api server
+            //increase wait time for response from api server
             req.setRetryPolicy(new DefaultRetryPolicy(
-                    7500,
+                    15000,
                     DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                     DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             queue.add(req);
