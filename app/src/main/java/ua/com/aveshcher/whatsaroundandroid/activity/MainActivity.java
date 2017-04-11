@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -46,8 +48,17 @@ public class MainActivity extends AppCompatActivity {
                     break;
             case R.id.random:
                 if (checked)
-                    category = "";
+                    category = "random";
+                break;
+            case R.id.historic:
+                if (checked)
+                    category = "historic";
                 break;
         }
+    }
+
+    public void openSettings(View view) {
+        Intent i = new Intent(this, SettingsActivity.class);
+        startActivity(i);
     }
 }

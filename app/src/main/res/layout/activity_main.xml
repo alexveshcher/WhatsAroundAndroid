@@ -55,7 +55,20 @@
                      android:layout_height="wrap_content"
                      android:text="@string/random"
                      android:onClick="selectCategory"/>
+        <RadioButton android:id="@+id/historic"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="@string/historic"
+                     android:onClick="selectCategory"/>
 
     </RadioGroup>
+    <Button
+            android:id="@+id/settings_button"
+            android:onClick="openSettings"
+            android:text="@string/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_anchorGravity="top|center_horizontal"
+            android:layout_gravity="bottom|center_horizontal"/>
 
 </android.support.design.widget.CoordinatorLayout>

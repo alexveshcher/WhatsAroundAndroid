@@ -31,7 +31,6 @@
                 android:value="@string/google_maps_key"/>
 
         <activity android:name=".activity.MapsActivity">
-
         </activity>
         <activity
                 android:name=".activity.MainActivity"
@@ -41,6 +40,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity
+                android:name=".activity.SettingsActivity"
+                android:label="@string/title_activity_settings"
+                android:parentActivityName=".activity.MainActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="ua.com.aveshcher.whatsaroundandroid.activity.MainActivity"/>
         </activity>
     </application>
 

@@ -1,10 +1,12 @@
 package ua.com.aveshcher.whatsaroundandroid.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -30,15 +32,13 @@ import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 
 import java.util.Random;
 
-import static android.graphics.Typeface.BOLD;
-import static android.graphics.Typeface.ITALIC;
-import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private String tag = "CONNECT";
     private String category;
+    private int radius;
     private static final String DOMAIN = "whats-around.herokuapp.com";
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -63,6 +63,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Intent intent = getIntent();
         category = intent.getStringExtra(MainActivity.CATEGORY);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
+//        Toast.makeText(getApplicationContext(),
+//                "search_radius: " + radius, Toast.LENGTH_LONG).show();
+
     }
 
 
@@ -125,11 +131,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(lat, lng))      // Sets the center of the map to Mountain View
-                    .zoom(13)                   // Sets the zoom
+                    .zoom(12)                   // Sets the zoom
 //                    .bearing(90)                // Sets the orientation of the camera to east
 //                    .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                     .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 2000, null);
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 3000, null);
         }
     }
 
@@ -148,7 +154,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             );
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            String reqUrl = "http://" + DOMAIN + "/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
+
+            String reqUrl = " ";
+            if(category.equals("random")){
+                reqUrl = "http://" + DOMAIN + "/api/v1/places/random/" + lastLat + "/" + lastLng + "/" + radius;
+            } else if(category.equals("historic")){
+                reqUrl = "http://" + DOMAIN + "/api/v1/places/by_category/" + lastLat + "/" + lastLng + "/"  + radius + "/" + category;
+            } else {
+                reqUrl = "http://" + DOMAIN + "/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
+            }
+
 
             JsonArrayRequest req = new JsonArrayRequest(reqUrl,
                     new Response.Listener<JSONArray>() {
@@ -212,7 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.addMarker(markerOptions);
     }
-    
+
 
     private String cutString(String s){
         String res = s;
