@@ -2,11 +2,14 @@ package ua.com.aveshcher.whatsaroundandroid.activity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 
 import android.widget.Toast;
@@ -18,11 +21,18 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.maps.android.ui.IconGenerator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
+
+import java.util.Random;
+
+import static android.graphics.Typeface.BOLD;
+import static android.graphics.Typeface.ITALIC;
+import static android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -98,7 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    private void navigateToLastLocation(){
+    private void navigateToLastLocation() {
         //        mMap = googleMap;
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -138,16 +148,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             );
 
             RequestQueue queue = Volley.newRequestQueue(this);
-            String reqUrl = "http://"+ DOMAIN +"/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
+            String reqUrl = "http://" + DOMAIN + "/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
 
             JsonArrayRequest req = new JsonArrayRequest(reqUrl,
                     new Response.Listener<JSONArray>() {
 
                         @Override
                         public void onResponse(JSONArray response) {
-                            Log.d(tag, "Response:"+ response.toString());
+                            Log.d(tag, "Response:" + response.toString());
                             String jsonResponseOutput = ""; //for debug purposes
                             try {
+                                IconGenerator iconFactory = new IconGenerator(getApplicationContext());
+                                Random r = new Random();
                                 for (int i = 0; i < response.length(); i++) {
 
                                     JSONObject placeObject = (JSONObject) response
@@ -159,14 +171,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-//                                    mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLat(), place.getLng())).title(place.getName()));
-                                    Marker placeMarker = mMap.addMarker(new MarkerOptions()
-                                            .position(new LatLng(place.getLat(), place.getLng()))
-                                            .title(place.getName())
-                                            .snippet(place.getAddress())
-                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
-                                    );
-//                                    placeMarker.showInfoWindow();
+                                    int i1 = r.nextInt(7 - 1) + 1;
+                                    iconFactory.setStyle(i1);
+
+                                    addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
+//                                    iconFactory.equals().
+
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -192,5 +202,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             queue.add(req);
         }
+    }
+
+    private void addIcon(IconGenerator iconFactory, CharSequence text, LatLng position) {
+        MarkerOptions markerOptions = new MarkerOptions().
+                icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(text))).
+                position(position).
+                anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
+
+        mMap.addMarker(markerOptions);
+    }
+    
+
+    private String cutString(String s){
+        String res = s;
+        if(s.length() > 22)
+            res = s.substring(0,18) + "...";
+        return res;
     }
 }
