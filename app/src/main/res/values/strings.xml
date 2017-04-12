@@ -100,4 +100,5 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="settings">settings</string>
+    <string name="monitor_places">Monitor places</string>
 </resources>

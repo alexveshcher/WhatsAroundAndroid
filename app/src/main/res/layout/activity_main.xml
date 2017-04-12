@@ -19,6 +19,12 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:popupTheme="@style/AppTheme.PopupOverlay"/>
+        <TextView
+                android:id="@+id/location_text_view"
+                android:text="Location: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -33,6 +39,15 @@
             android:layout_height="wrap_content"
             app:layout_anchorGravity="top|center_horizontal"
             android:layout_gravity="center|center_horizontal"/>
+    <Button
+            android:id="@+id/monitor_places_button"
+            android:onClick="monitorPlaces"
+            android:enabled="false"
+            android:text="@string/monitor_places"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_anchorGravity="top|center_horizontal"
+            android:layout_gravity="top"/>
 
     <RadioGroup
             android:layout_width="fill_parent"

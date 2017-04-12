@@ -39,6 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String tag = "CONNECT";
     private String category;
     private int radius;
+    private int refreshTime;
     private static final String DOMAIN = "whats-around.herokuapp.com";
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -66,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
+        refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
 //        Toast.makeText(getApplicationContext(),
 //                "search_radius: " + radius, Toast.LENGTH_LONG).show();
 
