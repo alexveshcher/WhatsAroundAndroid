@@ -11,7 +11,9 @@ import org.json.JSONObject;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RequestManager {
     private static final String DOMAIN = "whats-around.herokuapp.com";
@@ -40,7 +42,7 @@ public class RequestManager {
                         Log.d(TAG, "Response:" + response.toString());
                         String jsonResponseOutput = ""; //for debug purposes
                         try {
-                            List<Place> places = new ArrayList<>();
+                            Set<Place> places = new HashSet<>();
 
                             for (int i = 0; i < response.length(); i++) {
 
@@ -82,7 +84,7 @@ public class RequestManager {
     }
 
     public interface VolleyCallback{
-        void onSuccess(List<Place> places);
+        void onSuccess(Set<Place> places);
     }
 }
 

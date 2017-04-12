@@ -83,6 +83,24 @@ public class Place {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Place place = (Place) o;
+
+        if (!id.equals(place.id)) return false;
+        return name.equals(place.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + name.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "Place{" +
                 "id='" + id + '\'' +

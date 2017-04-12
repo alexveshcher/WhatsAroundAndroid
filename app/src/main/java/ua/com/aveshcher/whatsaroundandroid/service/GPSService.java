@@ -17,9 +17,12 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import ua.com.aveshcher.whatsaroundandroid.activity.MainActivity;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
+import ua.com.aveshcher.whatsaroundandroid.request.Comparer;
 import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GPSService extends Service {
 
@@ -28,6 +31,7 @@ public class GPSService extends Service {
     private String TAG = "LOCSERVICE: ";
     private int radius;
     private String category;
+    private Set<Place> oldPlaces;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -42,6 +46,7 @@ public class GPSService extends Service {
 
     @Override
     public void onCreate() {
+        oldPlaces = new HashSet<>();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         int refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
         radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
@@ -61,10 +66,18 @@ public class GPSService extends Service {
                 RequestManager requestManager = new RequestManager();
                 requestManager.receiveJSON(new RequestManager.VolleyCallback() {
                     @Override
-                    public void onSuccess(List<Place> places) {
-                        Toast.makeText(getApplicationContext(),
-                                "service places found" + places.size() + " " + radius + " " + category, Toast.LENGTH_LONG).show();
+                    public void onSuccess(Set<Place> places) {
+//                        Toast.makeText(getApplicationContext(),
+//                                "service places found" + places.size() + " " + radius + " " + category, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "service places found" + places.size() + " " + radius + " " + category);
+
+                        //finding new places
+                        Set<Place> newPlaces = places;
+                        Set<Place> diffPlaces = Comparer.diffPlaces(oldPlaces,newPlaces);
+                        oldPlaces = places;
+                        Log.d(TAG, "New places found " + diffPlaces.size());
+                        Toast.makeText(getApplicationContext(),
+                                "New places found " + diffPlaces.size() , Toast.LENGTH_SHORT).show();
                     }
                 }, getApplicationContext(),location.getLatitude(),location.getLongitude(),radius,category);
             }
@@ -93,7 +106,8 @@ public class GPSService extends Service {
 
 
         //noinspection MissingPermission
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,refreshTime*1000,0,listener);
+        //TODO change to refreshTime*1000
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,refreshTime*100,0,listener);
 
     }
 

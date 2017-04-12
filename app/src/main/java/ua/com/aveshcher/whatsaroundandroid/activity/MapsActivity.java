@@ -35,6 +35,7 @@ import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -169,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             final Random r = new Random();
             requestManager.receiveJSON(new RequestManager.VolleyCallback() {
                 @Override
-                public void onSuccess(List<Place> places) {
+                public void onSuccess(Set<Place> places) {
                     for(Place place : places){
                         int i1 = r.nextInt(7 - 1) + 1;
                         iconFactory.setStyle(i1);
