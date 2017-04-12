@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void monitorPlaces(View view) {
-        Intent intent = new Intent(getApplicationContext(), GPSService.class);
-//        intent.putExtra("CATEGORY",category);
+        Intent intent = new Intent(this, GPSService.class);
+        intent.putExtra("CATEGORY",category);
         startService(intent);
     }
 

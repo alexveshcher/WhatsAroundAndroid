@@ -1,5 +1,6 @@
 package ua.com.aveshcher.whatsaroundandroid.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -29,20 +30,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
+import ua.com.aveshcher.whatsaroundandroid.request.MySingleton;
+import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 
+import java.util.List;
 import java.util.Random;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    private String tag = "CONNECT";
+    private String TAG = "MAPACT";
     private String category;
     private int radius;
     private int refreshTime;
     private static final String DOMAIN = "whats-around.herokuapp.com";
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private RequestQueue requestQueue;
 
 
     @Override
@@ -70,6 +75,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
 //        Toast.makeText(getApplicationContext(),
 //                "search_radius: " + radius, Toast.LENGTH_LONG).show();
+        // Get a RequestQueue
+        requestQueue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
 
     }
 
@@ -155,69 +162,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
             );
 
-            RequestQueue queue = Volley.newRequestQueue(this);
+            RequestManager requestManager = new RequestManager();
+            requestQueue = Volley.newRequestQueue(getApplicationContext());
 
-            String reqUrl = " ";
-            if(category.equals("random")){
-                reqUrl = "http://" + DOMAIN + "/api/v1/places/random/" + lastLat + "/" + lastLng + "/" + radius;
-            } else if(category.equals("historic")){
-                reqUrl = "http://" + DOMAIN + "/api/v1/places/by_category/" + lastLat + "/" + lastLng + "/"  + radius + "/" + category;
-            } else {
-                reqUrl = "http://" + DOMAIN + "/api/v1/places/" + lastLat + "/" + lastLng + "/" + category;
-            }
-
-
-            JsonArrayRequest req = new JsonArrayRequest(reqUrl,
-                    new Response.Listener<JSONArray>() {
-
-                        @Override
-                        public void onResponse(JSONArray response) {
-                            Log.d(tag, "Response:" + response.toString());
-                            String jsonResponseOutput = ""; //for debug purposes
-                            try {
-                                IconGenerator iconFactory = new IconGenerator(getApplicationContext());
-                                Random r = new Random();
-                                for (int i = 0; i < response.length(); i++) {
-
-                                    JSONObject placeObject = (JSONObject) response
-                                            .get(i);
-
-                                    Place place = new Place(placeObject);
-                                    jsonResponseOutput = place.toString();
-//                                   TODO: maybe it is needed to parse categories of place
-
-
-
-                                    int i1 = r.nextInt(7 - 1) + 1;
-                                    iconFactory.setStyle(i1);
-
-                                    addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
-//                                    iconFactory.equals().
-
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Toast.makeText(getApplicationContext(),
-                                        "JSON parsing error:" + e.getMessage(),
-                                        Toast.LENGTH_LONG).show();
-                            }
-                            Log.d(tag, jsonResponseOutput);
-                        }
-                    }, new Response.ErrorListener() {
-
+            final IconGenerator iconFactory = new IconGenerator(getApplicationContext());
+            final Random r = new Random();
+            requestManager.receiveJSON(new RequestManager.VolleyCallback() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    VolleyLog.d(tag, "Error: " + error.getMessage());
-                    Toast.makeText(getApplicationContext(),
-                            "Response error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                public void onSuccess(List<Place> places) {
+                    for(Place place : places){
+                        int i1 = r.nextInt(7 - 1) + 1;
+                        iconFactory.setStyle(i1);
+                        addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
+                    }
                 }
-            });
-            //increase wait time for response from api server
-            req.setRetryPolicy(new DefaultRetryPolicy(
-                    15000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(req);
+            }, getApplicationContext(),lastLat,lastLng,radius,category);
         }
     }
 
