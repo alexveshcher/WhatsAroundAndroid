@@ -1,6 +1,7 @@
 package ua.com.aveshcher.whatsaroundandroid.service;
 
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,9 +13,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
+import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.activity.MainActivity;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 import ua.com.aveshcher.whatsaroundandroid.request.Comparer;
@@ -80,6 +83,7 @@ public class GPSService extends Service {
                         Log.d(TAG, "New places found " + diffPlaces.size());
 //                        Toast.makeText(getApplicationContext(),
 //                                "New places found " + diffPlaces.size() , Toast.LENGTH_SHORT).show();
+                        notificate();
                     }
                 }, getApplicationContext(),location.getLatitude(),location.getLongitude(),radius,category);
             }
@@ -120,6 +124,34 @@ public class GPSService extends Service {
         if(locationManager != null){
             //noinspection MissingPermission
             locationManager.removeUpdates(listener);
+        }
+    }
+
+    private void notificate(){
+        int newPlacesCount = diffPlaces.size();
+        if(newPlacesCount > 0){
+
+            String info = "";
+            for(Place p : diffPlaces){
+                info += p.getName() + " " + p.getAddress() + "\n";
+            }
+
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.common_full_open_on_phone)
+                            .setContentTitle("WhatsAround")
+                            .setContentText(info)
+                            .setTicker("We found " + newPlacesCount + " new places for you");
+
+            // Sets an ID for the notification
+            int mNotificationId = 001;
+            // Gets an instance of the NotificationManager service
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            // Builds the notification and issues it.
+            Log.d(TAG, "notificate: ");
+            notificationManager.notify(mNotificationId, mBuilder.build());
+
         }
     }
 }
