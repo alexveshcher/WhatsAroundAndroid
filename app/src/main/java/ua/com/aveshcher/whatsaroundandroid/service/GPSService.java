@@ -32,6 +32,7 @@ public class GPSService extends Service {
     private int radius;
     private String category;
     private Set<Place> oldPlaces;
+    HashSet<Place> diffPlaces;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -47,6 +48,7 @@ public class GPSService extends Service {
     @Override
     public void onCreate() {
         oldPlaces = new HashSet<>();
+        diffPlaces = new HashSet<>();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         int refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
         radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
@@ -61,6 +63,7 @@ public class GPSService extends Service {
                 Intent i = new Intent("location_update");
                 i.putExtra("latitude", location.getLatitude());
                 i.putExtra("longitude", location.getLongitude());
+                i.putExtra("new_places",diffPlaces);
                 sendBroadcast(i);
 
                 RequestManager requestManager = new RequestManager();
@@ -72,12 +75,11 @@ public class GPSService extends Service {
                         Log.d(TAG, "service places found" + places.size() + " " + radius + " " + category);
 
                         //finding new places
-                        Set<Place> newPlaces = places;
-                        Set<Place> diffPlaces = Comparer.diffPlaces(oldPlaces,newPlaces);
+                        diffPlaces = Comparer.diffPlaces(oldPlaces, places);
                         oldPlaces = places;
                         Log.d(TAG, "New places found " + diffPlaces.size());
-                        Toast.makeText(getApplicationContext(),
-                                "New places found " + diffPlaces.size() , Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(),
+//                                "New places found " + diffPlaces.size() , Toast.LENGTH_SHORT).show();
                     }
                 }, getApplicationContext(),location.getLatitude(),location.getLongitude(),radius,category);
             }

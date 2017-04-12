@@ -8,8 +8,8 @@ import java.util.Set;
 
 public class Comparer {
 
-    public static Set<Place> diffPlaces(Set<Place> oldPlaces, Set<Place> newPlaces) {
-        Set<Place> result = new HashSet<>();
+    public static HashSet<Place> diffPlaces(Set<Place> oldPlaces, Set<Place> newPlaces) {
+        HashSet<Place> result = new HashSet<>();
         int countOld = oldPlaces.size();
         int countNew = newPlaces.size();
         if ((countOld + countNew) > 1) {

@@ -4,7 +4,9 @@ package ua.com.aveshcher.whatsaroundandroid.dto;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Place {
+import java.io.Serializable;
+
+public class Place implements Serializable {
 
     private String id;
     private String name;

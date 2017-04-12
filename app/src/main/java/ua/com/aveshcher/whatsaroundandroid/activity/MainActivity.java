@@ -10,7 +10,10 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import ua.com.aveshcher.whatsaroundandroid.R;
+import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 import ua.com.aveshcher.whatsaroundandroid.service.GPSService;
+
+import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
     public final static String CATEGORY = "CATEGORY";
@@ -44,7 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onReceive(Context context, Intent intent) {
 //                    Toast.makeText(getApplicationContext(),"recieved smth", Toast.LENGTH_LONG).show();
-                    locationTextView.append("\n" +intent.getExtras().get("latitude") + " " + intent.getExtras().get("longitude"));
+//                    locationTextView.append("\n" +intent.getExtras().get("latitude") + " " + intent.getExtras().get("longitude"));
+                    HashSet<Place> diffPlaces = (HashSet<Place>) intent.getExtras().get("new_places");
+                    String info = "";
+                    for(Place p : diffPlaces){
+                        info += p.getName() + " " + p.getAddress() + "\n";
+                    }
+                    locationTextView.append("\n" + info);
                 }
             };
         }
