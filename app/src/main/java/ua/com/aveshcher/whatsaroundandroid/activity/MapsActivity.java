@@ -170,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Marker placeMarker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(place.getLat(), place.getLng()))
                         .title(place.getName())
-                        .snippet(place.getAddress() + place.getDistance())
+                        .snippet(place.getAddress())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
                 );
                 placeMarker.setTag(place);
@@ -180,11 +180,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Place place = (Place) marker.getTag();
+        if(marker.getTag() != null){
+            Place place = (Place) marker.getTag();
 //        Toast.makeText(this, place.getName(),
 //                Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, PlaceDetailsActivity.class);
-        intent.putExtra("place", place);
-        startActivity(intent);
+            Intent intent = new Intent(this, PlaceDetailsActivity.class);
+            intent.putExtra("place", place);
+            startActivity(intent);
+        }
     }
 }

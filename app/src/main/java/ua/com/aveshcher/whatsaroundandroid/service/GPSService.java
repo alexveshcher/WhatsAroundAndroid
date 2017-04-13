@@ -1,10 +1,7 @@
 package ua.com.aveshcher.whatsaroundandroid.service;
 
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.app.TaskStackBuilder;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,6 +44,12 @@ public class GPSService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(intent.getAction() != null){
+            if(intent.getAction().equals("STOP")) {
+                stopSelf();
+            }
+        }
+
         category = intent.getStringExtra(MainActivity.CATEGORY);
         return super.onStartCommand(intent, flags, startId);
     }
@@ -139,16 +142,18 @@ public class GPSService extends Service {
                 info += p.getName() + " " + p.getAddress() + "\n";
             }
 
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.common_full_open_on_phone)
-                            .setContentTitle("WhatsAround")
-                            .setContentText(info)
-                            .setTicker("We found " + newPlacesCount + " new places for you");
+            Intent intent = new Intent(this, GPSService.class);
+            intent.setAction("STOP");
+
+            PendingIntent pIntent = PendingIntent.getService(this,
+                    (int) System.currentTimeMillis(), intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+
 
             // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MapsActivity.class);
-
 
             resultIntent.putExtra("new_places", diffPlaces);
 
@@ -163,6 +168,22 @@ public class GPSService extends Service {
                             0,
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
+
+            // Create the reply action and add the remote input.
+            NotificationCompat.Action action =
+                    new NotificationCompat.Action.Builder(R.drawable.cast_ic_expanded_controller_stop,
+                            "Stop Monitoring", pIntent)
+                            .build();
+
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.common_full_open_on_phone)
+                            .setContentTitle("WhatsAround")
+                            .setContentText(info)
+                            .setTicker("We found " + newPlacesCount + " new place(s) for you")
+                    .addAction(action);
+
+
             mBuilder.setContentIntent(resultPendingIntent);
 
 
