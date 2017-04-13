@@ -126,6 +126,10 @@ public class GPSService extends Service {
     @Override
     public void onDestroy() {
 //        Log.d(TAG, "onDestroy()");
+        Toast.makeText(getApplicationContext(),
+                                "Place search stopped", Toast.LENGTH_SHORT).show();
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(001);
         super.onDestroy();
         if(locationManager != null){
             //noinspection MissingPermission

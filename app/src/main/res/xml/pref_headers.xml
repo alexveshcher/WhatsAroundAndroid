@@ -3,10 +3,6 @@
     <!-- These settings headers are only used on tablets. -->
 
 
-    <header
-            android:fragment="ua.com.aveshcher.whatsaroundandroid.activity.SettingsActivity$NotificationPreferenceFragment"
-            android:title="@string/pref_header_notifications"
-            android:icon="@drawable/ic_notifications_black_24dp"/>
 
     <header
             android:fragment="ua.com.aveshcher.whatsaroundandroid.activity.SettingsActivity$DataSyncPreferenceFragment"

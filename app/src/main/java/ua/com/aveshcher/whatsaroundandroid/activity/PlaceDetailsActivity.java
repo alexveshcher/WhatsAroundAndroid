@@ -35,7 +35,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
         nameTextView.setText(place.getName());
         addressTextView.setText(place.getAddress());
-        distanceTextView.setText(String.valueOf(place.getDistance()));
-        ratingTextView.setText(String.valueOf(place.getRating()));
+        distanceTextView.append(String.valueOf(place.getDistance()) + " m");
+        ratingTextView.append(String.valueOf(place.getRating()) + "/10");
     }
 }

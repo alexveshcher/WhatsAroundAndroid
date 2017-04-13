@@ -22,11 +22,17 @@ public class Place implements Serializable {
         String id = placeObject.getString("id");
         String name = placeObject.getString("name");
         String address = placeObject.getString("address");
+        if(address.equals("null")){
+            address = " ";
+        }
         double lat = placeObject.getDouble("lat");
         double lng = placeObject.getDouble("lng");
         int distance = placeObject.getInt("distance");
         String photoUrl = placeObject.getString("photo_url");
-        double rating = placeObject.getDouble("rating");
+        double rating = 0;
+        if(!placeObject.isNull("rating")){
+            rating = placeObject.getDouble("rating");
+        }
 
         this.id = id;
         this.name = name;
