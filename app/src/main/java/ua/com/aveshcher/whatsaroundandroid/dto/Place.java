@@ -14,6 +14,9 @@ public class Place implements Serializable {
     private double lat;
     private double lng;
     private int distance;
+    private String photoUrl;
+    private double rating;
+
 
     public Place(JSONObject placeObject) throws JSONException {
         String id = placeObject.getString("id");
@@ -22,6 +25,8 @@ public class Place implements Serializable {
         double lat = placeObject.getDouble("lat");
         double lng = placeObject.getDouble("lng");
         int distance = placeObject.getInt("distance");
+        String photoUrl = placeObject.getString("photo_url");
+        double rating = placeObject.getDouble("rating");
 
         this.id = id;
         this.name = name;
@@ -29,6 +34,8 @@ public class Place implements Serializable {
         this.lat = lat;
         this.lng = lng;
         this.distance = distance;
+        this.photoUrl = photoUrl;
+        this.rating = rating;
 
     }
 
@@ -84,6 +91,23 @@ public class Place implements Serializable {
         this.distance = distance;
     }
 
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -111,6 +135,8 @@ public class Place implements Serializable {
                 ", lat=" + lat +
                 ", lng=" + lng +
                 ", distance=" + distance +
+                ", photoUrl='" + photoUrl + '\'' +
+                ", rating=" + rating +
                 '}';
     }
 }
