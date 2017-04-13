@@ -1,58 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         tools:context="ua.com.aveshcher.whatsaroundandroid.activity.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
-        <TextView
-                android:id="@+id/location_text_view"
-                android:text="Location: "
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <include layout="@layout/content_main"/>
-
     <Button
-            android:id="@+id/find_places_button"
-            android:onClick="findPlaces"
-            android:enabled="false"
-            android:text="@string/find_places"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_anchorGravity="top|center_horizontal"
-            android:layout_gravity="center|center_horizontal"/>
-    <Button
-            android:id="@+id/monitor_places_button"
-            android:onClick="monitorPlaces"
-            android:enabled="false"
             android:text="@string/monitor_places"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchorGravity="top|center_horizontal"
-            android:layout_gravity="top"/>
+            android:id="@+id/monitor_places_button"
+            android:onClick="monitorPlaces"
+            android:enabled="false"
+            android:layout_marginStart="16dp"
+            app:layout_constraintLeft_toLeftOf="parent" android:layout_marginEnd="16dp"
+            app:layout_constraintRight_toRightOf="parent" android:layout_marginTop="16dp"
+            app:layout_constraintTop_toTopOf="parent"/>
+    <Button
+            android:text="@string/find_places"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:onClick="findPlaces"
+            android:id="@+id/find_places_button" android:layout_marginStart="16dp" app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginEnd="16dp" app:layout_constraintRight_toRightOf="parent" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/monitor_places_button"/>
 
     <RadioGroup
             android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             app:layout_anchorGravity="top|center_horizontal"
             android:layout_gravity="center|center_horizontal">
         <RadioButton android:id="@+id/food"
@@ -77,13 +57,19 @@
                      android:onClick="selectCategory"/>
 
     </RadioGroup>
+
     <Button
-            android:id="@+id/settings_button"
-            android:onClick="openSettings"
             android:text="@string/settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchorGravity="top|center_horizontal"
-            android:layout_gravity="bottom|center_horizontal"/>
-
-</android.support.design.widget.CoordinatorLayout>
+            android:id="@+id/settings_button" android:layout_marginStart="16dp" app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginEnd="16dp" app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="16dp"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="150dp"
+            android:layout_height="32dp"
+            android:id="@+id/location_text_view" android:layout_marginStart="16dp" app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="60dp"
+            android:layout_marginEnd="16dp" app:layout_constraintRight_toRightOf="parent"/>
+</android.support.constraint.ConstraintLayout>

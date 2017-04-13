@@ -51,8 +51,10 @@
                     android:value="ua.com.aveshcher.whatsaroundandroid.activity.MainActivity"/>
         </activity>
 
-        <service android:name="ua.com.aveshcher.whatsaroundandroid.service.GPSService"/>
+        <service android:name=".service.GPSService"/>
 
+        <activity android:name=".activity.PlaceDetailsActivity">
+        </activity>
     </application>
 
 </manifest>

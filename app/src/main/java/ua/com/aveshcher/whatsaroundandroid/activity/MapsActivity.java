@@ -37,7 +37,7 @@ import java.util.Random;
 import java.util.Set;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
     private String TAG = "MAPACT";
@@ -97,6 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnInfoWindowClickListener(this);
     }
 
     protected void onStart() {
@@ -165,46 +166,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
             );
 
-            final IconGenerator iconFactory = new IconGenerator(getApplicationContext());
-            final Random r = new Random();
             for(Place place : places){
-                int i1 = r.nextInt(7 - 1) + 1;
-                iconFactory.setStyle(i1);
-                addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
+                Marker placeMarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(place.getLat(), place.getLng()))
+                        .title(place.getName())
+                        .snippet(place.getAddress() + place.getDistance())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+                );
+                placeMarker.setTag(place);
             }
-
-//            RequestManager requestManager = new RequestManager();
-//            requestQueue = Volley.newRequestQueue(getApplicationContext());
-//
-//            final IconGenerator iconFactory = new IconGenerator(getApplicationContext());
-//            final Random r = new Random();
-//            requestManager.receiveJSON(new RequestManager.VolleyCallback() {
-//                @Override
-//                public void onSuccess(Set<Place> places) {
-//                    for(Place place : places){
-//                        int i1 = r.nextInt(7 - 1) + 1;
-//                        iconFactory.setStyle(i1);
-//                        addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
-//                    }
-//                }
-//            }, getApplicationContext(),lastLat,lastLng,radius,category);
         }
     }
 
-    private void addIcon(IconGenerator iconFactory, CharSequence text, LatLng position) {
-        MarkerOptions markerOptions = new MarkerOptions().
-                icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(text))).
-                position(position).
-                anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV());
-
-        mMap.addMarker(markerOptions);
-    }
-
-
-    private String cutString(String s){
-        String res = s;
-        if(s.length() > 22)
-            res = s.substring(0,18) + "...";
-        return res;
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Place place = (Place) marker.getTag();
+//        Toast.makeText(this, place.getName(),
+//                Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, PlaceDetailsActivity.class);
+        intent.putExtra("place", place);
+        startActivity(intent);
     }
 }
