@@ -5,15 +5,19 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
+import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 import ua.com.aveshcher.whatsaroundandroid.service.GPSService;
 
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     public final static String CATEGORY = "CATEGORY";
@@ -69,9 +73,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void findPlaces(View view) {
-        Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("CATEGORY",category);
-        startActivity(intent);
+
+        RequestManager requestManager = new RequestManager();
+        requestManager.receiveJSON(new RequestManager.VolleyCallback() {
+            @Override
+            public void onSuccess(Set<Place> places) {
+                HashSet<Place> places1 = (HashSet<Place>) places;
+                Log.d("MAIN_ACTIVITY", "PLACES FROM INTENT: " + places1.size());
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                intent.putExtra("new_places", places1);
+                startActivity(intent);
+            }
+        }, getApplicationContext(),50.5233873,30.6165221,radius,category);
     }
 
     public void monitorPlaces(View view) {

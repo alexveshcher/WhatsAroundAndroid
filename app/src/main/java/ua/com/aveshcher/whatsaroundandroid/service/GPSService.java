@@ -2,7 +2,9 @@ package ua.com.aveshcher.whatsaroundandroid.service;
 
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.activity.MainActivity;
+import ua.com.aveshcher.whatsaroundandroid.activity.MapsActivity;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 import ua.com.aveshcher.whatsaroundandroid.request.Comparer;
 import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
@@ -142,6 +145,26 @@ public class GPSService extends Service {
                             .setContentTitle("WhatsAround")
                             .setContentText(info)
                             .setTicker("We found " + newPlacesCount + " new places for you");
+
+            // Creates an explicit intent for an Activity in your app
+            Intent resultIntent = new Intent(this, MapsActivity.class);
+
+
+            resultIntent.putExtra("new_places", diffPlaces);
+
+
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+            stackBuilder.addParentStack(MapsActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+
 
             // Sets an ID for the notification
             int mNotificationId = 001;

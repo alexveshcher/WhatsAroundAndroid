@@ -1,8 +1,6 @@
 package ua.com.aveshcher.whatsaroundandroid.activity;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -33,6 +31,7 @@ import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 import ua.com.aveshcher.whatsaroundandroid.request.MySingleton;
 import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -42,13 +41,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private String TAG = "MAPACT";
-    private String category;
-    private int radius;
-    private int refreshTime;
-    private static final String DOMAIN = "whats-around.herokuapp.com";
+//    private String category;
+//    private int radius;
+//    private int refreshTime;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private RequestQueue requestQueue;
+//    private RequestQueue requestQueue;
+//    private BroadcastReceiver broadcastReceiver;
+    private HashSet<Place> places;
 
 
     @Override
@@ -69,15 +69,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         Intent intent = getIntent();
-        category = intent.getStringExtra(MainActivity.CATEGORY);
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
-        refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
+//        category = intent.getStringExtra(MainActivity.CATEGORY);
+        places = (HashSet<Place>) intent.getExtras().get("new_places");
+        Log.d(TAG, "PLACES FROM INTENT: "+ places.size());
+//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+//        radius = Integer.valueOf(sharedPref.getString("search_radius", "494"));
+//        refreshTime = Integer.valueOf(sharedPref.getString("refresh_time", "120"));
 //        Toast.makeText(getApplicationContext(),
 //                "search_radius: " + radius, Toast.LENGTH_LONG).show();
         // Get a RequestQueue
-        requestQueue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+//        requestQueue = MySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+
 
     }
 
@@ -163,21 +165,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
             );
 
-            RequestManager requestManager = new RequestManager();
-            requestQueue = Volley.newRequestQueue(getApplicationContext());
-
             final IconGenerator iconFactory = new IconGenerator(getApplicationContext());
             final Random r = new Random();
-            requestManager.receiveJSON(new RequestManager.VolleyCallback() {
-                @Override
-                public void onSuccess(Set<Place> places) {
-                    for(Place place : places){
-                        int i1 = r.nextInt(7 - 1) + 1;
-                        iconFactory.setStyle(i1);
-                        addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
-                    }
-                }
-            }, getApplicationContext(),lastLat,lastLng,radius,category);
+            for(Place place : places){
+                int i1 = r.nextInt(7 - 1) + 1;
+                iconFactory.setStyle(i1);
+                addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
+            }
+
+//            RequestManager requestManager = new RequestManager();
+//            requestQueue = Volley.newRequestQueue(getApplicationContext());
+//
+//            final IconGenerator iconFactory = new IconGenerator(getApplicationContext());
+//            final Random r = new Random();
+//            requestManager.receiveJSON(new RequestManager.VolleyCallback() {
+//                @Override
+//                public void onSuccess(Set<Place> places) {
+//                    for(Place place : places){
+//                        int i1 = r.nextInt(7 - 1) + 1;
+//                        iconFactory.setStyle(i1);
+//                        addIcon(iconFactory, cutString(place.getName())+"\n"+ cutString(place.getAddress()), new LatLng(place.getLat(), place.getLng()));
+//                    }
+//                }
+//            }, getApplicationContext(),lastLat,lastLng,radius,category);
         }
     }
 
