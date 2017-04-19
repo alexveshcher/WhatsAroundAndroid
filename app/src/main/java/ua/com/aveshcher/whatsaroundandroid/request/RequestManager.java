@@ -18,13 +18,8 @@ import java.util.Set;
 public class RequestManager {
     private static final String DOMAIN = "whats-around.herokuapp.com";
     private String TAG = "REQUEST_MANAGER";
-    private double lat;
-    private double lng;
-    private int radius;
 
     public void receiveJSON(final VolleyCallback callback, Context context, double lat, double lng, int radius, String category){
-
-
         String reqUrl = " ";
         if(category.equals("random")){
             reqUrl = "http://" + DOMAIN + "/api/v1/places/random/" + lat + "/" + lng + "/" + radius;

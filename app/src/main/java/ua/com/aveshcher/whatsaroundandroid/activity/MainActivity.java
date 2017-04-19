@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,9 +21,8 @@ import com.google.android.gms.location.LocationServices;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.dto.Place;
 import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
-import ua.com.aveshcher.whatsaroundandroid.service.GPSService;
+import ua.com.aveshcher.whatsaroundandroid.service.MonitorService;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -80,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
-
+            Toast.makeText(getApplicationContext(),
+                "Downloading places info", Toast.LENGTH_SHORT).show();
             double lat = mLastLocation.getLatitude();
             double lng = mLastLocation.getLongitude();
 
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void monitorPlaces(View view) {
-        Intent intent = new Intent(this, GPSService.class);
+        Intent intent = new Intent(this, MonitorService.class);
         intent.putExtra("CATEGORY",category);
         startService(intent);
     }

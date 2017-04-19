@@ -51,7 +51,7 @@
                     android:value="ua.com.aveshcher.whatsaroundandroid.activity.MainActivity"/>
         </activity>
 
-        <service android:name=".service.GPSService"/>
+        <service android:name=".service.MonitorService"/>
 
         <activity android:name=".activity.PlaceDetailsActivity">
         </activity>

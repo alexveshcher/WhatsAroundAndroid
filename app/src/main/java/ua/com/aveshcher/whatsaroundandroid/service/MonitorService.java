@@ -5,6 +5,7 @@ import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,7 +16,6 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
-import com.google.android.gms.maps.model.LatLng;
 import ua.com.aveshcher.whatsaroundandroid.R;
 import ua.com.aveshcher.whatsaroundandroid.activity.MainActivity;
 import ua.com.aveshcher.whatsaroundandroid.activity.MapsActivity;
@@ -24,10 +24,9 @@ import ua.com.aveshcher.whatsaroundandroid.request.Comparer;
 import ua.com.aveshcher.whatsaroundandroid.request.RequestManager;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class GPSService extends Service {
+public class MonitorService extends Service {
 
     private LocationListener listener;
     private LocationManager locationManager;
@@ -56,6 +55,7 @@ public class GPSService extends Service {
 
     @Override
     public void onCreate() {
+        showServiceStatusNotification();
         oldPlaces = new HashSet<>();
         diffPlaces = new HashSet<>();
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -64,7 +64,6 @@ public class GPSService extends Service {
 
 
 
-//        Log.d(TAG, "onCreate()");
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -79,17 +78,12 @@ public class GPSService extends Service {
                 requestManager.receiveJSON(new RequestManager.VolleyCallback() {
                     @Override
                     public void onSuccess(Set<Place> places) {
-//                        Toast.makeText(getApplicationContext(),
-//                                "service places found" + places.size() + " " + radius + " " + category, Toast.LENGTH_LONG).show();
                         Log.d(TAG, "service places found" + places.size() + " " + radius + " " + category);
 
-                        //finding new places
                         diffPlaces = Comparer.diffPlaces(oldPlaces, places);
                         oldPlaces = places;
                         Log.d(TAG, "New places found " + diffPlaces.size());
-//                        Toast.makeText(getApplicationContext(),
-//                                "New places found " + diffPlaces.size() , Toast.LENGTH_SHORT).show();
-                        notificate();
+                        notifyAboutNewPlace();
                     }
                 }, getApplicationContext(),location.getLatitude(),location.getLongitude(),radius,category);
             }
@@ -106,7 +100,6 @@ public class GPSService extends Service {
 
             @Override
             public void onProviderDisabled(String s) {
-//                Log.d(TAG, "onProviderDisabled()");
                 Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
@@ -114,13 +107,7 @@ public class GPSService extends Service {
         };
 
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-
-
-
-        //noinspection MissingPermission
-        //TODO change to refreshTime*1000
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,refreshTime*100,0,listener);
-
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,refreshTime*1000,0,listener);
     }
 
     @Override
@@ -129,43 +116,25 @@ public class GPSService extends Service {
         Toast.makeText(getApplicationContext(),
                                 "Place search stopped", Toast.LENGTH_SHORT).show();
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(002);
         notificationManager.cancel(001);
         super.onDestroy();
         if(locationManager != null){
-            //noinspection MissingPermission
             locationManager.removeUpdates(listener);
         }
     }
 
-    private void notificate(){
+    private void notifyAboutNewPlace(){
         int newPlacesCount = diffPlaces.size();
         if(newPlacesCount > 0){
 
-            String info = "";
-            for(Place p : diffPlaces){
-                info += p.getName() + " " + p.getAddress() + "\n";
-            }
-
-            Intent intent = new Intent(this, GPSService.class);
-            intent.setAction("STOP");
-
-            PendingIntent pIntent = PendingIntent.getService(this,
-                    (int) System.currentTimeMillis(), intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-
-
-            // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MapsActivity.class);
-
             resultIntent.putExtra("new_places", diffPlaces);
 
-
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-// Adds the back stack for the Intent (but not the Intent itself)
+            // Adds the back stack for the Intent (but not the Intent itself)
             stackBuilder.addParentStack(MapsActivity.class);
-// Adds the Intent that starts the Activity to the top of the stack
+            // Adds the Intent that starts the Activity to the top of the stack
             stackBuilder.addNextIntent(resultIntent);
             PendingIntent resultPendingIntent =
                     stackBuilder.getPendingIntent(
@@ -173,33 +142,47 @@ public class GPSService extends Service {
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
 
-            // Create the reply action and add the remote input.
-            NotificationCompat.Action action =
-                    new NotificationCompat.Action.Builder(R.drawable.cast_ic_expanded_controller_stop,
-                            "Stop Monitoring", pIntent)
-                            .build();
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.map_bigger)
+                            .setContentTitle("WhatsAround")
+                            .setContentText("We found " + newPlacesCount + " new place(s) for you")
+                            .setTicker("We found " + newPlacesCount + " new place(s) for you");
+            mBuilder.setContentIntent(resultPendingIntent);
+
+            int mNotificationId = 001;
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Log.d(TAG, "notificate: ");
+            notificationManager.notify(mNotificationId, mBuilder.build());
+        }
+    }
+
+    private void showServiceStatusNotification(){
+            Intent intent = new Intent(this, MonitorService.class);
+            intent.setAction("STOP");
+
+            PendingIntent pIntent = PendingIntent.getService(this,
+                    (int) System.currentTimeMillis(), intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
 
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.common_full_open_on_phone)
+                            .setSmallIcon(R.drawable.map_bigger)
                             .setContentTitle("WhatsAround")
-                            .setContentText(info)
-                            .setTicker("We found " + newPlacesCount + " new place(s) for you")
-                    .addAction(action);
+                            .setContentText("Click here to stop monitoring")
+                            .setTicker("Monitoring started")
+                            .setOngoing(true)
+                            .setPriority(Notification.PRIORITY_MAX);
+
+        mBuilder.setContentIntent(pIntent);
 
 
-            mBuilder.setContentIntent(resultPendingIntent);
-
-
-            // Sets an ID for the notification
-            int mNotificationId = 001;
-            // Gets an instance of the NotificationManager service
+            int mNotificationId = 002;
             NotificationManager notificationManager =
                     (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            // Builds the notification and issues it.
-            Log.d(TAG, "notificate: ");
             notificationManager.notify(mNotificationId, mBuilder.build());
-
-        }
     }
+
 }
